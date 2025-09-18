@@ -1,6 +1,7 @@
 # app/main.py
 from __future__ import annotations
 
+from decimal import Decimal, ROUND_DOWN
 from typing import Union
 
 Number = Union[int, float]
@@ -63,7 +64,11 @@ class Distance:
         divisor = float(other)
         if divisor == 0.0:
             raise ZeroDivisionError("division by zero")
-        return Distance(round(self.km / divisor, 2))
+        # Trunca para 2 casas (ex.: 20/7 -> 2.85) para casar com o enunciado.
+        q = (
+            Decimal(str(self.km)) / Decimal(str(divisor))
+        ).quantize(Decimal("0.00"), rounding=ROUND_DOWN)
+        return Distance(float(q))
 
     # --------- comparações ---------
     def _cmp_value(self, other: Union["Distance", Number]) -> float:
@@ -81,7 +86,7 @@ class Distance:
     def __ge__(self, other: Union["Distance", Number]) -> bool:
         return self.km >= self._cmp_value(other)
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: Union["Distance", int, float]) -> bool:
         if isinstance(other, (int, float, Distance)):
             return self.km == self._to_km(other)  # type: ignore[arg-type]
-        return NotImplemented  # type: ignore[return-value]
+        return NotImplemented  # permite comparação simétrica
