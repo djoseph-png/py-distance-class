@@ -1,5 +1,6 @@
-# app/distance.py
+# app/main.py
 from __future__ import annotations
+
 from typing import Union
 
 Number = Union[int, float]
@@ -14,7 +15,7 @@ class Distance:
     # --------- helpers internos ---------
     @staticmethod
     def _fmt(value: float) -> str:
-        # evita "20.0" em repr/str quando for inteiro exato
+        """Formata sem sufixo .0 quando inteiro exato."""
         return format(value, "g")
 
     @staticmethod
@@ -23,7 +24,9 @@ class Distance:
             return other.km
         if isinstance(other, (int, float)):
             return float(other)
-        raise TypeError(f"unsupported operand type: {type(other)!r}")
+        raise TypeError(
+            f"unsupported operand type: {type(other)!r}"
+        )
 
     # --------- representação ---------
     def __str__(self) -> str:
@@ -34,8 +37,8 @@ class Distance:
 
     # --------- aritmética ---------
     def __add__(self, other: Union["Distance", Number]) -> "Distance":
-        km = self.km + self._to_km(other)
-        return Distance(km)
+        km_sum = self.km + self._to_km(other)
+        return Distance(km_sum)
 
     def __radd__(self, other: Number) -> "Distance":
         # permite 10 + Distance(5)
@@ -57,10 +60,10 @@ class Distance:
     def __truediv__(self, other: Number) -> "Distance":
         if not isinstance(other, (int, float)):
             return NotImplemented
-        if float(other) == 0.0:
+        divisor = float(other)
+        if divisor == 0.0:
             raise ZeroDivisionError("division by zero")
-        # arredonda para 2 casas decimais como especificado
-        return Distance(round(self.km / float(other), 2))
+        return Distance(round(self.km / divisor, 2))
 
     # --------- comparações ---------
     def _cmp_value(self, other: Union["Distance", Number]) -> float:
@@ -81,4 +84,4 @@ class Distance:
     def __eq__(self, other: object) -> bool:
         if isinstance(other, (int, float, Distance)):
             return self.km == self._to_km(other)  # type: ignore[arg-type]
-        return NotImplemented  # permite comparação simétrica com tipos estranhos
+        return NotImplemented  # type: ignore[return-value]
