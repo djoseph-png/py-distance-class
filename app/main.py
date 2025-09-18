@@ -1,7 +1,7 @@
 # app/main.py
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Union
 
 Number = Union[int, float]
@@ -64,11 +64,12 @@ class Distance:
         divisor = float(other)
         if divisor == 0.0:
             raise ZeroDivisionError("division by zero")
-        # Trunca para 2 casas (ex.: 20/7 -> 2.85) para casar com o enunciado.
-        q = (
+        # Arredonda para 2 casas (half up), p/ casar com os testes:
+        # 50/3 -> 16.67, 30/7 -> 4.29, 12.6/3.3 -> 3.82
+        rounded_km = (
             Decimal(str(self.km)) / Decimal(str(divisor))
-        ).quantize(Decimal("0.00"), rounding=ROUND_DOWN)
-        return Distance(float(q))
+        ).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+        return Distance(float(rounded_km))
 
     # --------- comparações ---------
     def _cmp_value(self, other: Union["Distance", Number]) -> float:
